@@ -41,15 +41,15 @@ exports.getQuizById = async (req, res) => {
 // -------------------
 // Upload Recording
 // -------------------
-exports.uploadRecording = (req, res) => {
-  if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
+// exports.uploadRecording = (req, res) => {
+//   if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
 
-  res.json({
-    msg: "Recording uploaded successfully",
-    filename: req.file.filename,
-    url: `/uploads/${req.file.filename}`,
-  });
-};
+//   res.json({
+//     msg: "Recording uploaded successfully",
+//     filename: req.file.filename,
+//     url: `/uploads/${req.file.filename}`,
+//   });
+// };
 
 
 // save result in DB

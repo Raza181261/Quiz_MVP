@@ -16,7 +16,7 @@ const upload = multer({ storage });
 // Routes
 router.post("/create", quizController.createQuiz);
 router.get("/:quizId", quizController.getQuizById);
-router.post("/upload", upload.single("recording"), quizController.uploadRecording);
+// router.post("/upload", upload.single("recording"), quizController.uploadRecording);
 router.post("/save-result", quizController.saveResult);
 router.get("/results/:quizId", quizController.getResults);
 

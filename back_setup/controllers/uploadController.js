@@ -6,10 +6,14 @@ exports.getUploadUrl = async (req, res) => {
   try {
     const { quizId } = req.body;
 
+    if (!quizId) {
+      return res.status(400).json({ msg: "quizId is required" });
+    }
+
     const fileName = `recordings/${quizId}-${Date.now()}.webm`;
 
     const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET,
+      Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
       ContentType: "video/webm",
     });
@@ -20,10 +24,11 @@ exports.getUploadUrl = async (req, res) => {
 
     res.json({
       uploadUrl,
-      fileUrl: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET}/${fileName}`,
+      fileUrl: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${fileName}`,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Failed to generate upload URL" });
   }
 };
+

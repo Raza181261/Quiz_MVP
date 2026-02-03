@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -20,9 +19,7 @@ const StudentQuiz = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8000/api/quiz/${quizId}`
-        );
+        const res = await axios.get(`http://localhost:8000/api/quiz/${quizId}`);
         setQuiz(res.data);
       } catch (err) {
         console.error(err);
@@ -67,33 +64,32 @@ const StudentQuiz = () => {
         const blob = new Blob(chunks, { type: "video/webm" });
 
         try {
-          // 1️⃣ Get signed upload URL from backend
+          // 1️⃣ Get presigned URL
           const { data } = await axios.post(
             "http://localhost:8000/api/quiz/r2-upload-url",
-            { quizId }
+            { quizId }, // ✅ JSON
           );
 
-          // 2️⃣ Upload recording directly to Cloudflare R2
+          // 2️⃣ Upload directly to Cloudflare R2
           await axios.put(data.uploadUrl, blob, {
-            headers: { "Content-Type": "video/webm" },
+            headers: {
+              "Content-Type": "video/webm",
+            },
           });
 
-          // 3️⃣ Save quiz result (ONLY metadata)
-          await axios.post(
-            "http://localhost:8000/api/quiz/save-result",
-            {
-              quizId,
-              studentName: "Student Name", // later dynamic
-              score,
-              total: quiz.questions.length,
-              recordingURL: data.fileUrl,
-            }
-          );
+          // 3️⃣ Save quiz result (metadata only)
+          await axios.post("http://localhost:8000/api/quiz/save-result", {
+            quizId,
+            studentName: "Student Name",
+            score,
+            total: quiz.questions.length,
+            recordingURL: data.fileUrl,
+          });
 
           alert("Result & recording saved successfully ✅");
         } catch (err) {
           console.error(err);
-          alert("Failed to upload recording");
+          alert("Failed to upload recording ❌");
         }
       };
 
@@ -131,8 +127,8 @@ const StudentQuiz = () => {
       {!permissionGranted ? (
         <div className="permission-box">
           <p>
-            This quiz requires <strong>screen</strong> &{" "}
-            <strong>webcam</strong> access
+            This quiz requires <strong>screen</strong> & <strong>webcam</strong>{" "}
+            access
           </p>
           <button className="start-btn" onClick={startRecording}>
             Start Quiz
@@ -173,4 +169,3 @@ const StudentQuiz = () => {
 };
 
 export default StudentQuiz;
-

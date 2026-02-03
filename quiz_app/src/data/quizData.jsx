@@ -1,3 +1,4 @@
+//static quiz
 const quizData = [
   {
     question: "What does HTML stand for?",
