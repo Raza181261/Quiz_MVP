@@ -1,0 +1,30 @@
+.recordings-container {
+  padding: 20px;
+}
+
+.recordings-container h1 {
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+/* Grid: 3 recordings per row */
+.recordings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.recording-card {
+  background: #1f1f1f;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score-text {
+  color: white; /* Score text white */
+  margin-top: 10px;
+  text-align: center;
+}

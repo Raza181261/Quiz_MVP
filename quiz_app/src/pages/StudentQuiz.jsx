@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { startScreenRecording } from "../utils/screenRecorder";
 import "./StudentQuiz.css";
 
 const StudentQuiz = () => {
@@ -12,10 +13,15 @@ const StudentQuiz = () => {
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
 
+  const scoreRef = useRef(score); // ✅ Ref to keep latest score
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
 
-  // 🔹 Fetch quiz
+  // 🔹 Fetch Quiz
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -23,7 +29,7 @@ const StudentQuiz = () => {
         setQuiz(res.data);
       } catch (err) {
         console.error(err);
-        alert("Quiz not found");
+        alert("Quiz not found ❌");
       } finally {
         setLoading(false);
       }
@@ -37,51 +43,26 @@ const StudentQuiz = () => {
   // ▶ START RECORDING
   const startRecording = async () => {
     try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
-      });
-
-      const webcamStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-
-      const combinedStream = new MediaStream([
-        ...screenStream.getVideoTracks(),
-        ...webcamStream.getVideoTracks(),
-        ...webcamStream.getAudioTracks(),
-      ]);
-
-      const recorder = new MediaRecorder(combinedStream);
-      let chunks = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-      };
-
-      recorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
-
+      const recorder = await startScreenRecording(async (blob) => {
         try {
           // 1️⃣ Get presigned URL
           const { data } = await axios.post(
             "http://localhost:8000/api/quiz/r2-upload-url",
-            { quizId }, // ✅ JSON
+            { quizId },
           );
 
-          // 2️⃣ Upload directly to Cloudflare R2
+          // 2️⃣ Upload to Cloudflare R2
           await axios.put(data.uploadUrl, blob, {
             headers: {
               "Content-Type": "video/webm",
             },
           });
 
-          // 3️⃣ Save quiz result (metadata only)
+          // 3️⃣ Save result metadata
           await axios.post("http://localhost:8000/api/quiz/save-result", {
             quizId,
-            studentName: "Student Name",
-            score,
+            studentName: "Student",
+            score: scoreRef.current, // Use ref to get latest score
             total: quiz.questions.length,
             recordingURL: data.fileUrl,
           });
@@ -89,11 +70,10 @@ const StudentQuiz = () => {
           alert("Result & recording saved successfully ✅");
         } catch (err) {
           console.error(err);
-          alert("Failed to upload recording ❌");
+          alert("Recording upload failed ❌");
         }
-      };
+      });
 
-      recorder.start();
       setMediaRecorder(recorder);
       setPermissionGranted(true);
     } catch (err) {
