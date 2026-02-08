@@ -57,6 +57,13 @@ const StudentQuiz = () => {
               "Content-Type": "video/webm",
             },
           });
+          // await fetch(data.uploadUrl, {
+          //   method: "PUT",
+          //   body: blob,
+          //   headers: {
+          //     "Content-Type": "video/webm",
+          //   },
+          // });
 
           // 3️⃣ Save result metadata
           await axios.post("http://localhost:8000/api/quiz/save-result", {

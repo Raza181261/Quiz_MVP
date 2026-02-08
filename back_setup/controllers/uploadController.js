@@ -10,12 +10,14 @@ exports.getUploadUrl = async (req, res) => {
       return res.status(400).json({ msg: "quizId is required" });
     }
 
-    const fileName = `recordings/${quizId}-${Date.now()}.webm`;
+    const fileName = `/recordings/${quizId}-${Date.now()}.webm`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
       ContentType: "video/webm",
+      // 🔥 THIS IS THE FIX
+      ChecksumAlgorithm: undefined,
     });
 
     const uploadUrl = await getSignedUrl(r2, command, {
@@ -24,11 +26,10 @@ exports.getUploadUrl = async (req, res) => {
 
     res.json({
       uploadUrl,
-      fileUrl: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${fileName}`,
+      fileUrl: `${process.env.R2_PUBLIC_URL}/${fileName}`,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Failed to generate upload URL" });
   }
 };
-
